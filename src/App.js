@@ -1,26 +1,40 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from 'react'
+import './App.scss'
+import { initClient } from './utils/initTorrent'
+import Content from './components/Content/Content'
+
+export const UserContext = React.createContext()
 
 function App() {
+  const [userData, setUserData] = useState(null)
+
+  const getClientData = () => {
+    let client = initClient()
+
+    let newData = {
+      client: client,
+      torrents: [],
+    }
+
+    setUserData({ ...newData })
+  }
+
+  useEffect(() => {
+    userData === null && getClientData()
+  }, [])
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <UserContext.Provider
+      value={{
+        userData: userData,
+        setUserData: setUserData,
+      }}
+    >
+      <div className="app">
+        <Content />
+      </div>
+    </UserContext.Provider>
+  )
 }
 
-export default App;
+export default App
