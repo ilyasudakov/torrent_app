@@ -41,6 +41,9 @@ const Content = (props) => {
     })
 
     const onProgress = () => {
+      if (userContext.userData.client.get(torrent.magnetURI) === null) {
+        return clearInterval(interval)
+      }
       return setTorrents((torrents) => {
         let newTorrents = torrents
         // console.log(torrents[index].filesHidden)
@@ -50,13 +53,13 @@ const Content = (props) => {
           uploadSpeed: torrent.uploadSpeed / 1000,
           timeRemaining: torrent.timeRemaining,
           progress: torrent.progress,
-          filesHidden: torrents[index].filesHidden,
+          filesHidden: torrents.length > 0 ? torrents[index].filesHidden : true,
         })
         return [...newTorrents]
       })
     }
 
-    let interval = setInterval(onProgress, 1000)
+    var interval = setInterval(onProgress, 1000)
 
     const onDone = () => {
       console.log('torrent downloaded')
@@ -144,10 +147,18 @@ const Content = (props) => {
             newTorrents[id].filesHidden = !newTorrents[id].filesHidden
             return setTorrents([...newTorrents])
           }}
+          deleteItem={(id) => {
+            let newTorrents = torrents
+            console.log(newTorrents)
+            let deletedItem = newTorrents.splice(id, 1)
+            userContext.userData.client.remove(deletedItem[0].magnetURI)
+            setTorrents([...newTorrents])
+          }}
           previewTorrent={(id) => {
             const torrent = torrents[id].files.find(function (file) {
               return file.name.endsWith('.mp4')
             })
+
             if (torrent) {
               setPreviewTorrent({
                 ...torrents[id],
@@ -244,7 +255,12 @@ const TorrentList = (props) => {
                 </div>
                 <div className="torrent-list__actions">
                   {/* <div className="torrent-list__action">Открыть</div> */}
-                  <div className="torrent-list__action">Удалить</div>
+                  <div
+                    className="torrent-list__action"
+                    onClick={() => props.deleteItem(index)}
+                  >
+                    Удалить
+                  </div>
                   <div
                     className="torrent-list__action"
                     onClick={() => props.hideTorrents(index)}

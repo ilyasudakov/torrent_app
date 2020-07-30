@@ -414,8 +414,12 @@
                     // flex-direction: column;
                     flex-wrap: wrap;
 
+                    .torrent-list__picture {
+                        flex: 0 1 80px;
+                    }
+
                     .torrent-list__torrent-info {
-                        flex: 0 1 calc(100% - 120px);
+                        flex: 0 1 calc(100% - 100px);
                         // min-width: 300px;
 
                         .torrent-list__status-bar {
