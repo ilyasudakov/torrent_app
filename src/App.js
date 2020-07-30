@@ -14,6 +14,7 @@ function App() {
     let newData = {
       client: client,
       torrents: [],
+      previewTorrent: null,
     }
 
     setUserData({ ...newData })
@@ -21,7 +22,7 @@ function App() {
 
   useEffect(() => {
     userData === null && getClientData()
-  }, [])
+  }, [userData])
 
   return (
     <UserContext.Provider

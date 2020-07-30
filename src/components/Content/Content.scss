@@ -10,8 +10,10 @@
     font-size: 1rem;
 
     &__title {
+        width: 100%;
         font-size: 150%;
         margin-bottom: 15px;
+        text-align: left;
     }
 
     &__preview-wrapper {
@@ -26,7 +28,7 @@
         align-items: center;
 
         #preview-wrapper__player {
-            flex: 0 1 60%;
+            flex: 0 1 70%;
             video {
                 border-radius: 15px;
                 box-shadow: 0px 0px 10px rgba(#ffffff, 0.2);
@@ -36,7 +38,7 @@
         }
 
         .preview-wrapper__file-info {
-            flex: 0 1 40%;
+            flex: 0 1 30%;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
@@ -49,6 +51,43 @@
         }
     }
 
+    &__controls {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: center;
+        width: 100%;
+        margin: 15px 0;
+    }
+
+    &__img {
+        width: 25px;
+    }
+
+    &__button {
+        background-color: #4f4f4f;
+        color: #dddddd;
+        border-radius: 999px;
+        padding: 10px 15px;
+        cursor: pointer;
+        margin-right: 5px;
+        transition: 100ms ease-in-out;
+        width: fit-content;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+
+        .content__img {
+            margin-right: 5px;
+        }
+
+        &:hover {
+            background-color: #555555;
+            color: #eeeeee;
+        }
+    }
+
     .torrent-list {
         display: flex;
         flex-direction: column;
@@ -58,24 +97,70 @@
 
         &__item {
             display: flex;
-            flex-direction: row;
+            flex-direction: column;
             justify-content: flex-start;
-            align-items: stretch;
+            align-items: center;
             width: 100%;
+            padding: 10px 10px;
+            transition: 100ms ease-out;
+            background-color: #3f3f3f;
+            border-radius: 10px;
 
             &:hover {
-                background-color: #555555;
-                border-radius: 10px;
+                background-color: #444444;
+
+                .torrent-list__file-item {
+                    background-color: #3b3b3b !important;
+                }
+            }
+
+            .torrent-list__main {
+                display: flex;
+                flex-direction: row;
+                justify-content: flex-start;
+                align-items: stretch;
+                width: 100%;
             }
 
             .torrent-list__picture {
                 flex: 0 1 100px;
                 // width: 100px;
                 // max-width: 100px;
-                height: 100px;
+                height: 80px;
                 // max-height: fit-content;
-                background-color: #777777;
+                background-color: #555555;
                 border-radius: 10px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                position: relative;
+
+                .torrent-list__img {
+                    width: 60px;
+                }
+
+                &:hover {
+                    cursor: pointer;
+                    &::before {
+                        position: absolute;
+                        content: "";
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        border-radius: inherit;
+                        background-color: rgba(#ffffff, 0.1);
+                        backdrop-filter: blur(10px);
+                    }
+                    &::after {
+                        content: "";
+                        border: 20px solid transparent;
+                        border-left: 30px solid #eeeeee;
+                        position: absolute;
+                        top: 20px;
+                        left: 30px;
+                    }
+                }
             }
 
             .torrent-list__torrent-info {
@@ -89,6 +174,27 @@
                 }
             }
 
+            .torrent-list__status-bar {
+                display: flex;
+                flex-direction: row;
+                justify-content: flex-start;
+                align-items: center;
+
+                .torrent-list__speed {
+                    padding: 5px 0px;
+                    margin-right: 25px;
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    white-space: nowrap;
+
+                    .torrent-list__img {
+                        width: 15px;
+                        margin-right: 5px;
+                    }
+                }
+            }
+
             .torrent-list__actions {
                 display: flex;
                 flex-direction: row;
@@ -97,7 +203,149 @@
 
                 .torrent-list__action {
                     cursor: pointer;
-                    margin-right: 5px;
+                    margin-right: 15px;
+
+                    &:hover {
+                        text-decoration: underline;
+                    }
+                }
+            }
+        }
+
+        .torrent-list__sub-list {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+
+            &--hidden {
+                display: none;
+            }
+
+            .torrent-list__file-item {
+                width: 100%;
+                border-radius: 5px;
+                background-color: #444444;
+                margin-bottom: 10px;
+                transition: 100ms ease-out;
+
+                &:last-child {
+                    margin-bottom: 0;
+                }
+
+                .torrent-list__torrent-info {
+                    min-height: 100%;
+                    flex: 0 1 80%;
+                    padding: 5px 15px;
+
+                    .torrent-list__name {
+                        font-size: 110%;
+                        color: #cccccc;
+                    }
+                }
+            }
+        }
+    }
+
+    @media (max-width: 1024px) {
+        & {
+            max-width: 700px;
+
+            &__preview-wrapper {
+                flex-direction: column;
+
+                .preview-wrapper__file-info {
+                    width: 100%;
+                    text-align: left;
+                }
+            }
+
+            .torrent-list {
+                .torrent-list__picture {
+                    &:hover {
+                        &::after {
+                            top: 22.5px;
+                            left: 25px;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @media (max-width: 768px) {
+        & {
+            max-width: 90%;
+
+            .torrent-list {
+                .torrent-list__main {
+                    // flex-direction: column;
+                    // flex-wrap: wrap;
+
+                    .torrent-list__picture {
+                        &:hover {
+                            &::after {
+                                left: calc(50% - 10px);
+                            }
+                        }
+                    }
+
+                    .torrent-list__torrent-info {
+                        flex: 0 1 30%;
+                        // min-width: 300px;
+
+                        .torrent-list__status-bar {
+                            flex-direction: column;
+                            align-items: flex-start;
+                        }
+                    }
+
+                    .torrent-list__actions {
+                        flex: 0 1 50%;
+                        // width: 100%;
+                        // padding: 10px 0;
+                    }
+                }
+            }
+        }
+    }
+
+    @media (max-width: 500px) {
+        & {
+            .content__controls {
+                flex-direction: column;
+                align-items: flex-start;
+                // margin: 5px 0;
+                .content__button {
+                    margin-bottom: 10px;
+
+                    &:last-child {
+                        margin-bottom: 0;
+                    }
+                }
+            }
+            .torrent-list {
+                .torrent-list__main {
+                    // flex-direction: column;
+                    flex-wrap: wrap;
+
+                    .torrent-list__torrent-info {
+                        flex: 0 1 30%;
+                        // min-width: 300px;
+
+                        .torrent-list__status-bar {
+                            flex-direction: column;
+                            align-items: flex-start;
+                        }
+                    }
+
+                    .torrent-list__actions {
+                        flex: 0 1 100%;
+                        width: 100%;
+                        padding: 10px 0;
+                    }
                 }
             }
         }
