@@ -1,6 +1,6 @@
 import React, { useEffect, useContext, useState } from 'react'
 import './Content.scss'
-// import folderOpenIcon from '../../assets/folder-open-line.svg'
+import folderOpenIcon from '../../assets/folder-open-line.svg'
 import folderClosedIcon from '../../assets/folder-line.svg'
 import downloadIcon from '../../assets/download.svg'
 import uploadIcon from '../../assets/upload.svg'
@@ -12,53 +12,69 @@ import { UserContext } from '../../App'
 const Content = (props) => {
   const userContext = useContext(UserContext)
   const [torrents, setTorrents] = useState([])
+  const [torrentLink, setTorrentLink] = useState('')
+  const [showTorrentLink, setShowTorrentLink] = useState('')
   const [previewTorrent, setPreviewTorrent] = useState(null)
   const [dataLoaded, setDataLoaded] = useState(false)
 
   useEffect(() => {
-    const torrentCallback = (torrent) => {
-      // Torrents can contain many files. Let's use the .mp4 file
+    if (userContext?.userData?.client && !dataLoaded) {
       setDataLoaded(true)
+      const torrentId =
+        'magnet:?xt=urn:btih:08ada5a7a6183aae1e09d831df6748d566095a10&dn=Sintel&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&ws=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2F&xs=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2Fsintel.torrent'
+      addTorrent(torrentId)
+    }
+    // console.log(userContext.userData)
+  }, [dataLoaded, userContext, torrents, previewTorrent])
 
-      setTorrents([
+  const torrentCallback = (torrent) => {
+    console.log(torrent)
+    const index = torrents.length > 0 ? torrents.length : 0
+    setTorrents((torrents) => {
+      return [
         ...torrents,
         {
           ...torrent,
           filesHidden: true,
         },
-      ])
+      ]
+    })
 
-      const onProgress = () => {
-        console.log(torrents)
+    const onProgress = () => {
+      return setTorrents((torrents) => {
         let newTorrents = torrents
-        newTorrents.splice(torrents.length - 1, 1, {
+        // console.log(torrents[index].filesHidden)
+        newTorrents.splice(index, 1, {
           ...torrent,
           downloadSpeed: torrent.downloadSpeed / 1000,
           uploadSpeed: torrent.uploadSpeed / 1000,
-          filesHidden:
-            torrents.length > 0
-              ? torrents[torrents.length - 1].filesHidden
-              : true,
+          timeRemaining: torrent.timeRemaining,
+          progress: torrent.progress,
+          filesHidden: torrents[index].filesHidden,
         })
-        setTorrents((torrents) => {
-          return [...newTorrents]
-        })
-      }
-
-      //   console.log(torrents)
-      setInterval(onProgress, 1000)
-      onProgress()
+        return [...newTorrents]
+      })
     }
 
-    if (userContext?.userData?.client && !dataLoaded) {
-      const torrentId =
-        'magnet:?xt=urn:btih:08ada5a7a6183aae1e09d831df6748d566095a10&dn=Sintel&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&ws=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2F&xs=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2Fsintel.torrent'
+    let interval = setInterval(onProgress, 1000)
 
-      userContext.userData.client.add(torrentId, (torrent) =>
+    const onDone = () => {
+      console.log('torrent downloaded')
+      clearInterval(interval)
+    }
+
+    torrent.on('done', onDone)
+
+    onProgress()
+  }
+
+  const addTorrent = (torrentLink) => {
+    if (userContext?.userData?.client) {
+      return userContext.userData.client.add(torrentLink, (torrent) =>
         torrentCallback(torrent),
       )
     }
-  }, [dataLoaded, userContext, torrents, previewTorrent])
+  }
 
   return (
     <div className="content">
@@ -66,51 +82,95 @@ const Content = (props) => {
       {/* {previewTorrent ? ( */}
       <div className="content__preview-wrapper">
         <div id="preview-wrapper__player"></div>
-        <div className="preview-wrapper__file-info">
-          {previewTorrent
-            ? previewTorrent.files.find(function (file) {
-                return file.name.endsWith('.mp4')
-              }).name
-            : null}
-        </div>
+        {previewTorrent ? (
+          <div className="preview-wrapper__file-info">
+            <div className="preview-wrapper__info-item preview-wrapper__info-item--name">
+              <img className="content__img" src={fileIcon} alt="" />
+              {
+                previewTorrent.files.find(function (file) {
+                  return file.name.endsWith('.mp4')
+                }).name
+              }
+            </div>
+            <div className="preview-wrapper__info-item preview-wrapper__info-item--size">
+              <img className="content__img" src={downloadIcon} alt="" />
+              {`${Math.round(previewTorrent.length / 1000)} KBytes`}
+            </div>
+          </div>
+        ) : null}
       </div>
       {/* ) : null} */}
       <div className="content__controls">
-        <div className="content__button">
+        <label className="content__button" htmlFor="torrentFileUploader">
           <img className="content__img" src={fileIcon} alt="" />
           Открыть торрент-файл
-        </div>
-        <div className="content__button">
+        </label>
+        <div
+          className="content__button"
+          onClick={() => setShowTorrentLink(!showTorrentLink)}
+        >
           <img className="content__img" src={linkIcon} alt="" />
           Ссылка на торрент
         </div>
+        {showTorrentLink ? (
+          <div className="controls__input-field">
+            <input
+              type="text"
+              placeholder="Введите ссылку на торрент..."
+              onChange={(event) => setTorrentLink(event.target.value)}
+            ></input>
+            <div
+              className="content__button"
+              onClick={() => addTorrent(torrentLink)}
+            >
+              Скачать
+            </div>
+          </div>
+        ) : null}
+        <input
+          id="torrentFileUploader"
+          type="file"
+          placeholder="Загрузите файл..."
+          onChange={(event) => {
+            addTorrent(event.target.files[0])
+          }}
+        ></input>
       </div>
-      <TorrentList
-        torrents={torrents}
-        hideTorrents={(id) => {
-          let newTorrents = torrents
-
-          newTorrents[id].filesHidden = !newTorrents[id].filesHidden
-
-          setTorrents([...newTorrents])
-        }}
-        previewTorrent={(id) => {
-          setPreviewTorrent({
-            ...torrents[id],
-          })
-
-          let myNode = document.getElementById('preview-wrapper__player')
-          while (myNode.firstChild) {
-            myNode.removeChild(myNode.firstChild)
-          }
-
-          torrents[id].files
-            .find(function (file) {
+      {torrents.length > 0 ? (
+        <TorrentList
+          torrents={torrents}
+          hideTorrents={(id) => {
+            let newTorrents = torrents
+            newTorrents[id].filesHidden = !newTorrents[id].filesHidden
+            return setTorrents([...newTorrents])
+          }}
+          previewTorrent={(id) => {
+            const torrent = torrents[id].files.find(function (file) {
               return file.name.endsWith('.mp4')
             })
-            .appendTo('#preview-wrapper__player')
-        }}
-      />
+            if (torrent) {
+              setPreviewTorrent({
+                ...torrents[id],
+              })
+
+              let myNode = document.getElementById('preview-wrapper__player')
+              while (myNode.firstChild) {
+                myNode.removeChild(myNode.firstChild)
+              }
+
+              torrents[id].files
+                .find(function (file) {
+                  return file.name.endsWith('.mp4')
+                })
+                .appendTo('#preview-wrapper__player')
+            }
+          }}
+        />
+      ) : (
+        <div>
+          Добавьте торрент-файл или magnet-ссылку для начала скачивания...
+        </div>
+      )}
     </div>
   )
 }
@@ -130,18 +190,13 @@ const TorrentList = (props) => {
                   className="torrent-list__picture"
                   onClick={() => props.previewTorrent(index)}
                 >
-                  {torrent.files.find(
-                    (file) =>
-                      file.name.endsWith('.jpeg') ||
-                      file.name.endsWith('.jpg') ||
-                      file.name.endsWith('.png'),
-                  ) ? (
-                    <img
-                      className="torrent-list__img"
-                      src={folderClosedIcon}
-                      alt=""
-                    />
-                  ) : null}
+                  <img
+                    className="torrent-list__img"
+                    src={
+                      torrent.filesHidden ? folderClosedIcon : folderOpenIcon
+                    }
+                    alt=""
+                  />
                 </div>
                 <div className="torrent-list__torrent-info">
                   <div className="torrent-list__name">{torrent.name}</div>
@@ -162,10 +217,33 @@ const TorrentList = (props) => {
                       />
                       {`${Math.round(torrent.uploadSpeed)} KBytes/sec`}
                     </div>
+                    <div className="torrent-list__speed">
+                      <img
+                        className="torrent-list__img"
+                        src={uploadIcon}
+                        alt=""
+                      />
+                      {`${Math.round(
+                        ((torrent.timeRemaining / 60) * 100) / 100,
+                      )} min`}
+                    </div>
+                  </div>
+                  <div className="torrent-list__progress-bar">
+                    <div
+                      className="torrent-list__progress-bar torrent-list__progress-bar--completed"
+                      style={{
+                        width: `${
+                          Math.round(parseFloat(torrent.progress) * 100) / 100
+                        }%`,
+                      }}
+                    ></div>
+                  </div>
+                  <div className="torrent-list__speed">
+                    {`${Math.round(parseFloat(torrent.progress) * 100) / 100}%`}
                   </div>
                 </div>
                 <div className="torrent-list__actions">
-                  <div className="torrent-list__action">Открыть</div>
+                  {/* <div className="torrent-list__action">Открыть</div> */}
                   <div className="torrent-list__action">Удалить</div>
                   <div
                     className="torrent-list__action"
@@ -185,6 +263,9 @@ const TorrentList = (props) => {
                     <div className="torrent-list__file-item" key={fileIndex}>
                       <div className="torrent-list__torrent-info">
                         <div className="torrent-list__name">{file.name}</div>
+                        <div className="torrent-list__speed">{`${Math.round(
+                          file.length / 1000,
+                        )} KBytes`}</div>
                       </div>
                     </div>
                   ))}
