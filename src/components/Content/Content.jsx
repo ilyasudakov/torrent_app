@@ -81,7 +81,7 @@ const Content = (props) => {
 
   return (
     <div className="content">
-      <div className="content__title">Торрент Клиент</div>
+      {/* <div className="content__title">Торрент Клиент</div> */}
       {/* {previewTorrent ? ( */}
       <div className="content__preview-wrapper">
         <div id="preview-wrapper__player"></div>
