@@ -91,13 +91,25 @@ const Content = (props) => {
               <img className="content__img" src={fileIcon} alt="" />
               {
                 previewTorrent.files.find(function (file) {
-                  return file.name.endsWith('.mp4')
+                  return (
+                    file.name.endsWith('.mp4') ||
+                    file.name.endsWith('.wav') ||
+                    file.name.endsWith('.mp3')
+                  )
                 }).name
               }
             </div>
             <div className="preview-wrapper__info-item preview-wrapper__info-item--size">
               <img className="content__img" src={downloadIcon} alt="" />
-              {`${Math.round(previewTorrent.length / 1000)} KBytes`}
+              {`${Math.round(
+                previewTorrent.files.find(function (file) {
+                  return (
+                    file.name.endsWith('.mp4') ||
+                    file.name.endsWith('.wav') ||
+                    file.name.endsWith('.mp3')
+                  )
+                }).length / 1000,
+              )} KBytes`}
             </div>
           </div>
         ) : null}
@@ -156,7 +168,11 @@ const Content = (props) => {
           }}
           previewTorrent={(id) => {
             const torrent = torrents[id].files.find(function (file) {
-              return file.name.endsWith('.mp4')
+              return (
+                file.name.endsWith('.mp4') ||
+                file.name.endsWith('.wav') ||
+                file.name.endsWith('.mp3')
+              )
             })
 
             if (torrent) {
@@ -169,11 +185,7 @@ const Content = (props) => {
                 myNode.removeChild(myNode.firstChild)
               }
 
-              torrents[id].files
-                .find(function (file) {
-                  return file.name.endsWith('.mp4')
-                })
-                .appendTo('#preview-wrapper__player')
+              torrent.appendTo('#preview-wrapper__player')
             }
           }}
         />
